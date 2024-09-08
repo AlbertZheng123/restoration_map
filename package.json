@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "axois": "^0.0.1-security",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^4.2.1",
+    "react-router-dom": "^6.26.1"
+  }
+}
