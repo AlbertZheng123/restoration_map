@@ -1,128 +1,81 @@
-// import React, { useState, useEffect } from 'react';
-// import SmallMap from './SmallMap';
-// import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-// import 'react-circular-progressbar/dist/styles.css';
-// import Navbar from './components/Navbar';
-
-// export default function Impact() {
-//   const [savedPolygons, setSavedPolygons] = useState([]);
-
-//   // Load saved polygons from localStorage
-//   useEffect(() => {
-//     const loadedPolygons = JSON.parse(localStorage.getItem('savedPolygons')) || [];
-//     setSavedPolygons(loadedPolygons);
-//   }, []);
-
-//   // Dummy percentage data for progress bars (replace with actual data when available)
-//   const getRandomPercentage = () => Math.floor(Math.random() * 100);
-
-//   return (
-//     <div className="flex container mx-auto">
-//       <Navbar />
-//       <div className="impact-container flex-grow p-4">
-//         <h2 className="text-2xl font-bold mb-4">Impact Sections</h2>
-//         <div className="impact-grid grid grid-cols-1 md:grid-cols-2 gap-4">
-//           {savedPolygons.length > 0 ? (
-//             savedPolygons.map((polygonData, index) => (
-//               <div key={index} className="impact-section flex flex-col md:flex-row items-center bg-white shadow-md rounded p-4">
-//                 {/* Left side: SmallMap */}
-//                 <div className="map-container w-full md:w-1/2 p-2">
-//                   <SmallMap
-//                     savedPolygon={polygonData.polygon} 
-//                     plantMarkers={polygonData.markers}
-//                     isViewOnly={true}
-//                     mapHeight="300px"
-//                     mapWidth="100%"
-//                   />
-//                 </div>
-
-//                 {/* Right side: Circular progress bar */}
-//                 <div className="progress-bar-container w-full md:w-1/2 p-2 flex justify-center">
-//                   <div style={{ width: '180px', height: '180px' }}>
-//                     <CircularProgressbar
-//                       value={getRandomPercentage()}
-//                       text={`${getRandomPercentage()}%`}
-//                       styles={buildStyles({
-//                         pathColor: `rgba(62, 152, 199, 0.85)`,
-//                         textColor: '#333',
-//                         textSize: '24px',
-//                         pathTransitionDuration: 0.5,
-//                       })}
-//                     />
-//                   </div>
-//                 </div>
-//               </div>
-//             ))
-//           ) : (
-//             <p className="text-center text-gray-500">No polygons have been saved yet.</p>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+import Navbar from './components/Navbar';
 import React, { useState, useEffect } from 'react';
 import SmallMap from './SmallMap';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import Navbar from './components/Navbar';
+import { FaLeaf, FaTree, FaRecycle, FaWater } from 'react-icons/fa';
+import { Link } from 'react-router-dom';  // Import Link for navigation
 
 export default function Impact() {
   const [savedPolygons, setSavedPolygons] = useState([]);
 
-  // Load saved polygons from localStorage
   useEffect(() => {
     const loadedPolygons = JSON.parse(localStorage.getItem('savedPolygons')) || [];
     setSavedPolygons(loadedPolygons);
   }, []);
 
-  // Dummy percentage data for progress bars (replace with actual data when available)
   const getRandomPercentage = () => Math.floor(Math.random() * 100);
+  const metrics = [
+    { label: 'Biomass Production', value: getRandomPercentage() },
+    { label: 'Plant Vitality', value: getRandomPercentage() },
+    { label: 'Invasive Species Removed', value: getRandomPercentage() },
+    { label: 'Water Retention', value: getRandomPercentage() },
+  ];
 
   return (
     <div className="flex">
-      {/* Sidebar with Navbar */}
+      {/* Sidebar */}
       <div className="w-64 bg-gray-800 text-white h-screen p-4 flex-shrink-0">
         <Navbar />
       </div>
 
-      {/* Main Content Area */}
-      <div className="impact-container flex-grow p-8 bg-gray-100">
-        <h2 className="text-2xl font-bold mb-4">Impact Sections</h2>
-        <div className="impact-grid grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Main Content */}
+      <div className="flex-grow p-8 bg-gray-100">
+        <h2 className="text-3xl font-bold mb-8 text-center">Impact Dashboard</h2>
+        
+        <div className="impact-grid grid grid-cols-1 md:grid-cols-2 gap-8">
           {savedPolygons.length > 0 ? (
             savedPolygons.map((polygonData, index) => (
-              <div
-                key={index}
-                className="impact-section flex flex-col md:flex-row items-center bg-white shadow-md rounded p-4"
+              <Link 
+                key={index} 
+                to={`/map-details/${index}`}  // Navigate to detailed map page
+                state={{ polygonData, metrics }}  // Pass only serializable data (polygon and metrics)
+                className="impact-section bg-white shadow-lg rounded-lg p-6 flex flex-col items-center hover:shadow-xl transition-shadow cursor-pointer"
               >
-                {/* Left side: SmallMap */}
-                <div className="map-container w-full md:w-1/2 p-2">
+                {/* Centered Title */}
+                <h3 className="text-lg font-bold mb-6 text-center">Restoration Area {index + 1}</h3>
+
+                {/* Map Section */}
+                <div className="map-container w-full h-[300px] mb-6 rounded-lg overflow-hidden border border-gray-200">
                   <SmallMap
                     savedPolygon={polygonData.polygon}
                     plantMarkers={polygonData.markers}
                     isViewOnly={true}
-                    mapHeight="300px"
+                    mapHeight="100%"
                     mapWidth="100%"
                   />
                 </div>
                 
-                {/* Right side: Circular progress bar */}
-                <div className="progress-bar-container w-full md:w-1/2 p-2 flex justify-center">
-                  <div style={{ width: '180px', height: '180px' }}>
-                    <CircularProgressbar
-                      value={getRandomPercentage()}
-                      text={`${getRandomPercentage()}%`}
-                      styles={buildStyles({
-                        pathColor: `rgba(62, 152, 199, 0.85)`,
-                        textColor: '#333',
-                        textSize: '24px',
-                        pathTransitionDuration: 0.5,
-                      })}
-                    />
-                  </div>
+                {/* Stats Section (Lined Horizontally) */}
+                <div className="stats-container w-full flex justify-between items-center space-x-4">
+                  {metrics.map((metric, i) => (
+                    <div key={i} className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16">
+                        <CircularProgressbar
+                          value={metric.value}
+                          text={`${metric.value}%`}
+                          styles={buildStyles({
+                            pathColor: '#4CAF50',
+                            textColor: '#333',
+                            textSize: '12px',
+                          })}
+                        />
+                      </div>
+                      <p className="text-xs font-medium">{metric.label}</p>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <p className="text-center text-gray-500">No polygons have been saved yet.</p>

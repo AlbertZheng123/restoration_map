@@ -5,6 +5,7 @@ import Home from './Home';
 import SmallMapPage from './SmallMapPage';
 import PlantDatabase from './PlantDatabase';
 import Impact from './Impact';
+import MapDetails from './MapDetails';  // Import the MapDetails component
 import SavedPolygonsPage from './SavedPolygonsPage'; // Import the new Saved Polygons Page
 
 function App() {
@@ -48,6 +49,8 @@ function App() {
           path="/home"
           element={<Home savedPolygon={savedPolygon} setSavedPolygon={setSavedPolygon} />}
         />
+        <Route path="/" element={<Impact />} />
+        <Route path="/map-details/:id" element={<MapDetails />} />
       </Routes>
     </Router>
   );

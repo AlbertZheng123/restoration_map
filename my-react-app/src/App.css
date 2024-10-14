@@ -51,10 +51,6 @@
   height: 100vh;
 }
 
-.map-container {
-  margin: 0 auto;
-  padding: 20px;
-}
 
 body, html {
   margin: 0;
@@ -112,11 +108,6 @@ header {
   flex-direction: column;
 }
 
-.map-container {
-  height: 400px;
-  width: 100%;
-  border: 1px solid #ccc;
-}
 
 .polygon-data {
   margin-top: 20px;
@@ -278,14 +269,7 @@ button:hover {
   margin-bottom: 20px;
 }
 
-.map-container {
-  flex: 2; /* Make the map take up more space */
-  min-width: 400px; /* Ensure the map is large enough */
-  height: 300px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
-}
+
 
 .progress-bar-container {
   flex: 1; /* Make the progress bar take up less space */
@@ -294,3 +278,175 @@ button:hover {
   align-items: center;
 }
 
+/* Styling for Impact Page */
+.impact-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+}
+
+.impact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.impact-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.circular-progress {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+}
+
+.impact-section h3 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.metric-icon {
+  font-size: 30px;
+  color: #4CAF50;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.impact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.impact-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px; /* Increased width for larger cards */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px; /* Add more space between the cards */
+}
+
+.impact-section h3 {
+  font-size: 1.75rem; /* Increased the title size */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.impact-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  transition: box-shadow 0.3s ease-in-out;
+  cursor: pointer; /* Make the card clickable */
+}
+
+.impact-section:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Hover effect */
+}
+
+
+.map-container {
+  height: 700px;  /* Adjust the map height */
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    height: 800px; /* Even larger map for bigger screens */
+  }
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.stats-container > div {
+  margin: 0;
+}
+
+.stats-container .text-xs {
+  font-size: 0.75rem;
+}
+
+.stats-container .w-16 {
+  width: 64px; /* Adjust size of the progress bars */
+  height: 64px;
+}
+
+.stats-container .text-2xl {
+  font-size: 1.5rem; /* Smaller icons */
+}
+/* Calendar */
+.react-datepicker-wrapper {
+  display: inline-block;
+  width: auto;
+}
+
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-container input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Map container */
+.map-container {
+  width: 100%;
+  height: 500px;  /* Adjusted size for smaller map */
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    height: 700px;
+  }
+}

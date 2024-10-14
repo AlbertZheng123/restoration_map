@@ -69,7 +69,7 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
   };
 
   return (
-    <div>
+    <div style={{ height: mapHeight, width: '100%' }}>  {/* Directly apply height here */}
       {!isViewOnly && (
         <div>
           <h3>Native Plant Species</h3>
@@ -96,7 +96,7 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
         </div>
       )}
 
-      <MapContainer style={{ height: mapHeight, width: "100%" }} center={[34.4269, -118.5754]} zoom={10}>
+      <MapContainer style={{ height: '100%', width: "100%" }} center={[34.4269, -118.5754]} zoom={10}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
