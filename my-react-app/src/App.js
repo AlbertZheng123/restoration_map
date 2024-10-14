@@ -44,6 +44,10 @@ function App() {
           path="/saved-polygons" 
           element={<SavedPolygonsPage />} // Route for the Saved Polygons Page
         />
+        <Route 
+          path="/home"
+          element={<Home savedPolygon={savedPolygon} setSavedPolygon={setSavedPolygon} />}
+        />
       </Routes>
     </Router>
   );
