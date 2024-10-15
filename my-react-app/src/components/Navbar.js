@@ -1,57 +1,71 @@
-// // src/components/Navbar.js
-// import React from 'react';
-// import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-// function Navbar() {
-//   const navigate = useNavigate();
-  
-//   return (
-//     <div className="sidebar">  {/* or className="navbar" */}
-//       <h2>Menu</h2>
-//       <ul>
-//         <li onClick={() => navigate('/home')}>Overview</li>
-//         <li>Plants</li>
-//         <li>Regions</li>
-//         <li onClick={() => navigate('/impact')}>Impact</li>
-//         <li onClick={() => navigate('/plant-database')}>Plant Database</li>
-//         <li onClick={() => navigate('/saved-polygons')}>View Saved Polygons</li>
-//       </ul>
-//     </div>
-//   );
-// }
+const Navbar = () => {
+    const navigate = useNavigate();
+    const [showNavbar, setShowNavbar] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
 
-// export default Navbar;
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+    // Scroll event handler
+    const handleScroll = () => {
+        if (typeof window !== 'undefined') {
+            if (window.scrollY > lastScrollY) {
+                setShowNavbar(false); // Scrolling down
+            } else {
+                setShowNavbar(true); // Scrolling up
+            }
+            setLastScrollY(window.scrollY); // Update last scroll position
+        }
+    };
 
-function Navbar() {
-  const navigate = useNavigate();
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [lastScrollY]);
 
-  return (
-    <div className="h-full w-64 bg-gray-900 text-white p-4 shadow-xl">
-      <h2 className="text-xl font-bold mb-4">Menu</h2>
-      <ul className="space-y-2">
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded" onClick={() => navigate('/home')}>
-          Overview
-        </li>
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded">
-          Plants
-        </li>
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded">
-          Regions
-        </li>
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded" onClick={() => navigate('/impact')}>
-          Impact
-        </li>
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded" onClick={() => navigate('/plant-database')}>
-          Plant Database
-        </li>
-        <li className="cursor-pointer hover:bg-gray-800 p-2 rounded" onClick={() => navigate('/saved-polygons')}>
-          View Saved Polygons
-        </li>
-      </ul>
-    </div>
-  );
+    return (
+        <div className={`navbar bg-base-900 border-b-0 fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
+            <div className="navbar-start">
+                <div className="dropdown">
+                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                        </svg>
+                    </div>
+                    <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 text-base-content rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                        <li><a href="#about">About</a></li>
+                        <li>
+                            <a href="#demo">Pricing</a>
+                            <ul className="p-2">
+                                <li><a href="#faq">FAQ</a></li>
+                                <li><a href="/test">Test</a></li>
+                            </ul>
+                        </li>
+                        <li className="btn btn-active btn-primary"><a href="/login">Login</a></li>
+                    </ul>
+                </div>
+                <a onClick={() => navigate('/landing')} className="flex items-center space-x-3 rtl:space-x-reverse btn btn-ghost text-xl">
+                    <span className="self-center font-changa text-2xl font-semibold">Blaze</span>
+                </a>
+            </div>
+
+            <div className="navbar-center hidden lg:flex">
+                <ul className="menu menu-horizontal px-1 space-x-8">
+                    <li><a href="#pricing" className="text-gray-300 hover:bg-gray-700">About</a></li>
+                    <li><a href="#demo" className="text-gray-300 hover:bg-gray-700">FAQ</a></li>
+                    <li><a href="#faq" className="text-gray-300 hover:bg-gray-700">Login</a></li>
+                </ul>
+            </div>
+
+            <div className="navbar-end">
+                <button onClick={() => navigate('/Home')} className="btn btn-primary">
+                    Home
+                </button>
+            </div>
+        </div>
+    );
 }
 
 export default Navbar;

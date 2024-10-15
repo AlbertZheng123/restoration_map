@@ -52,7 +52,7 @@
 // }
 import React, { useState, useEffect } from 'react';
 import SmallMap from './SmallMap'; // Reuse SmallMap component for rendering
-import Navbar from './components/Navbar';
+import Navbar from './components/Sidebar';
 
 export default function SavedPolygonsPage() {
   const [savedPolygons, setSavedPolygons] = useState([]);

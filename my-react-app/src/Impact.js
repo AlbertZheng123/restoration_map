@@ -1,4 +1,4 @@
-import Navbar from './components/Navbar';
+import Navbar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
 import SmallMap from './SmallMap';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
