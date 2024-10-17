@@ -27,6 +27,11 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
     setLocalPlantMarkers(plantMarkers);
   }, [plantMarkers]);
 
+  useEffect(() => {
+    console.log('Saved Polygon:', savedPolygon);
+    console.log('Plant Markers:', localPlantMarkers);
+  }, [savedPolygon, localPlantMarkers]);
+
   const handleMapClick = (e) => {
     if (isViewOnly || !activeSpecies) {
       return; // No markers placed if in view-only mode or no species is selected
@@ -58,6 +63,28 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
       setActiveSpecies(selectedSpecies);
     }
   };
+
+  // Validation function for LatLng objects (with lat/lng keys)
+  const isValidLatLngObject = (point) => {
+    const { lat, lng } = point || {};
+    const isValid = typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng);
+
+    if (!isValid) {
+      console.warn(`Invalid LatLng detected: Lat=${lat}, Lng=${lng}`);
+    }
+
+    return isValid;
+  };
+
+  // Filter invalid LatLng objects in the polygon
+  const validPolygon = savedPolygon ? savedPolygon.filter(isValidLatLngObject) : [];
+
+  // If no valid polygon points, log and avoid rendering polygon
+  useEffect(() => {
+    if (validPolygon.length === 0) {
+      console.warn('No valid polygon points to render.');
+    }
+  }, [validPolygon]);
 
   // Create circle marker icon
   const createCircleMarker = (color) => {
@@ -102,21 +129,27 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {savedPolygon && savedPolygon.length > 0 && (
+        {/* Render valid polygon */}
+        {validPolygon.length > 0 ? (
           <>
-            <Polygon positions={savedPolygon} color="blue" />
-            <FocusPolygon polygon={savedPolygon} /> {/* Define this component */}
+            <Polygon positions={validPolygon.map(({ lat, lng }) => [lat, lng])} color="blue" />
+            <FocusPolygon polygon={validPolygon} /> {/* Define this component */}
           </>
+        ) : (
+          <p>No valid polygon points to display.</p>
         )}
 
         {!isViewOnly && <MapInteractionHandler activeSpecies={activeSpecies} onMapClick={handleMapClick} />}
 
+        {/* Render plant markers */}
         {localPlantMarkers.map((marker, index) => (
-          <Marker 
-            key={index} 
-            position={[marker.lat, marker.lng]} 
-            icon={createCircleMarker(marker.color)} // Use circle markers with species color
-          />
+          isValidLatLngObject(marker) && (
+            <Marker 
+              key={index} 
+              position={[marker.lat, marker.lng]} 
+              icon={createCircleMarker(marker.color)} // Use circle markers with species color
+            />
+          )
         ))}
       </MapContainer>
     </div>
@@ -142,8 +175,10 @@ function FocusPolygon({ polygon }) {
 
   useEffect(() => {
     if (polygon && polygon.length > 0) {
-      const bounds = L.latLngBounds(polygon);
+      const bounds = L.latLngBounds(polygon.map(({ lat, lng }) => [lat, lng]));
       map.fitBounds(bounds); // Adjust the map view to fit the polygon bounds
+    } else {
+      console.warn('FocusPolygon: No valid polygon points for fitting bounds.');
     }
   }, [polygon, map]);
 

@@ -1,9 +1,8 @@
-import Navbar from './components/Sidebar';
+import Navbar from './components/Navbar';
 import React, { useState, useEffect } from 'react';
 import SmallMap from './SmallMap';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { FaLeaf, FaTree, FaRecycle, FaWater } from 'react-icons/fa';
 import { Link } from 'react-router-dom';  // Import Link for navigation
 
 export default function Impact() {
@@ -11,7 +10,27 @@ export default function Impact() {
 
   useEffect(() => {
     const loadedPolygons = JSON.parse(localStorage.getItem('savedPolygons')) || [];
-    setSavedPolygons(loadedPolygons);
+
+    // Format both polygons and markers to ensure they are in correct { lat, lng } format
+    const formattedPolygons = loadedPolygons.map(polygonData => ({
+      ...polygonData,
+      polygon: polygonData.polygon.map(point => {
+        if (Array.isArray(point) && point.length === 2) {
+          // Convert [lat, lng] to { lat: lat, lng: lng }
+          return { lat: point[0], lng: point[1] };
+        }
+        return point; // Already in correct format
+      }),
+      markers: polygonData.markers.map(marker => {
+        if (Array.isArray(marker) && marker.length === 2) {
+          // Convert [lat, lng] to { lat: lat, lng: lng }
+          return { lat: marker[0], lng: marker[1] };
+        }
+        return marker; // Already in correct format
+      })
+    }));
+
+    setSavedPolygons(formattedPolygons);
   }, []);
 
   const getRandomPercentage = () => Math.floor(Math.random() * 100);
@@ -49,7 +68,7 @@ export default function Impact() {
                 <div className="map-container w-full h-[300px] mb-6 rounded-lg overflow-hidden border border-gray-200">
                   <SmallMap
                     savedPolygon={polygonData.polygon}
-                    plantMarkers={polygonData.markers}
+                    plantMarkers={polygonData.markers}  // Ensure markers are passed here
                     isViewOnly={true}
                     mapHeight="100%"
                     mapWidth="100%"

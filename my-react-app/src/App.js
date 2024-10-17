@@ -8,6 +8,7 @@ import Impact from './Impact';
 import MapDetails from './MapDetails';  // Import the MapDetails component
 import SavedPolygonsPage from './SavedPolygonsPage'; // Import the new Saved Polygons Page
 import Landing from './Landing'; // Import the Landing Page
+import BiomassOverlayPage from './BiomassOverlayPage';
 
 function App() {
   const [savedPolygon, setSavedPolygon] = useState(null); // Global state to store the polygon
@@ -53,6 +54,8 @@ function App() {
         <Route path="/" element={<Impact />} />
         <Route path="/map-details/:id" element={<MapDetails />} />
         <Route path="/landing" element={<Landing />} />
+        <Route path="/biomass-overlay" element={<BiomassOverlayPage />} /> {/* Add new route */}
+        <Route path="/biomass-overlay" element={<BiomassOverlayPage />} />
       </Routes>
     </Router>
   );

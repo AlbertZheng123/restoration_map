@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import L from 'leaflet';
-import "leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.css";  // Ensure Leaflet CSS is imported
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 import { EditControl } from "react-leaflet-draw";
@@ -61,57 +61,60 @@ export default function MapComponent({ onSavePolygon, savedPolygon, isPolygonDis
   };
 
   return (
-    <MapContainer 
-      center={[34.4269, -118.5754]} 
-      zoom={20} 
-      style={{ height: "100%", width: "100%" }}
-    >
-      <MapInteractionHandler 
-        isPlantModeActive={isPlantModeActive} 
-        onMapClick={handleMapClick} // Pass map click handler to the interaction handler
-      />
+    <div style={{ height: '500px', width: '100%' }}> {/* Make sure the container has a height */}
+      <MapContainer 
+        center={[34.4269, -118.5754]} 
+        zoom={20} 
+        style={{ height: "100%", width: "100%" }} // Map needs to have height and width
+      >
+        <MapInteractionHandler 
+          isPlantModeActive={isPlantModeActive} 
+          onMapClick={handleMapClick} // Pass map click handler to the interaction handler
+        />
 
-      <FeatureGroup ref={featureGroupRef}>
-        <EditControl
-          position='topright'
-          onCreated={handleCreated}
-          draw={{
-            rectangle: false,
-            circle: false,
-            circlemarker: false,
-            marker: false,
-            polyline: false,
-            polygon: {
-              allowIntersection: false,
-              drawError: {
-                color: '#e1e100',
-                message: "<strong>Oh snap!<strong> you can't draw that!"
+        <FeatureGroup ref={featureGroupRef}>
+          <EditControl
+            position='topright'
+            onCreated={handleCreated}
+            draw={{
+              rectangle: false,
+              circle: false,
+              circlemarker: false,
+              marker: false,
+              polyline: false,
+              polygon: {
+                allowIntersection: false,
+                drawError: {
+                  color: '#e1e100',
+                  message: "<strong>Oh snap!<strong> you can't draw that!"
+                },
+                shapeOptions: {
+                  color: '#bada55'
+                }
               },
-              shapeOptions: {
-                color: '#bada55'
-              }
-            },
-          }}
+            }}
+          />
+        </FeatureGroup>
+
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      </FeatureGroup>
 
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+        {isPolygonDisplayed && savedPolygon && (
+          <Polygon positions={savedPolygon} color="blue" />
+        )}
 
-      {isPolygonDisplayed && savedPolygon && (
-        <Polygon positions={savedPolygon} color="blue" />
-      )}
-
-      {/* Use custom plant icon for each marker */}
-      {localPlantMarkers.map((marker, index) => (
-        <Marker 
-          key={index} 
-          position={[marker.lat, marker.lng]} 
-          icon={plantIcon} // Apply the custom icon
-        />
-      ))}
-    </MapContainer>
+        {/* Use custom plant icon for each marker */}
+        {localPlantMarkers.map((marker, index) => (
+          <Marker 
+            key={index} 
+            position={[marker.lat, marker.lng]} 
+            icon={plantIcon} // Apply the custom icon
+          />
+        ))}
+      </MapContainer>
+    </div>
   );
 }
+
