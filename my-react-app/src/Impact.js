@@ -3,32 +3,42 @@ import React, { useState, useEffect } from 'react';
 import SmallMap from './SmallMap';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { Link } from 'react-router-dom';  // Import Link for navigation
+import { Link } from 'react-router-dom';
 
 export default function Impact() {
   const [savedPolygons, setSavedPolygons] = useState([]);
 
   useEffect(() => {
-    const loadedPolygons = JSON.parse(localStorage.getItem('savedPolygons')) || [];
+    const loadedPolygons = JSON.parse(localStorage.getItem('savedPolygonData')) || [];
 
-    // Format both polygons and markers to ensure they are in correct { lat, lng } format
-    const formattedPolygons = loadedPolygons.map(polygonData => ({
-      ...polygonData,
-      polygon: polygonData.polygon.map(point => {
-        if (Array.isArray(point) && point.length === 2) {
-          // Convert [lat, lng] to { lat: lat, lng: lng }
-          return { lat: point[0], lng: point[1] };
-        }
-        return point; // Already in correct format
-      }),
-      markers: polygonData.markers.map(marker => {
-        if (Array.isArray(marker) && marker.length === 2) {
-          // Convert [lat, lng] to { lat: lat, lng: lng }
-          return { lat: marker[0], lng: marker[1] };
-        }
-        return marker; // Already in correct format
-      })
-    }));
+    // Correctly format the polygons (with or without inner polygons)
+    const formattedPolygons = loadedPolygons.map(polygonData => {
+      if (polygonData.type === 'polygon_with_inner_polygons') {
+        return {
+          ...polygonData,
+          mainPolygon: (polygonData.mainPolygon || []).map(point => {
+            return { lat: point.lat, lng: point.lng };
+          }),
+          innerPolygons: (polygonData.innerPolygons || []).map(inner => ({
+            ...inner, // Ensure each inner polygon maintains its data structure
+            coords: (inner.coords || []).map(coord => {
+              return { lat: coord.lat, lng: coord.lng };
+            })
+          }))
+        };
+      } else if (polygonData.type === 'polygon_with_markers') {
+        return {
+          ...polygonData,
+          polygon: (polygonData.polygon || []).map(point => {
+            return { lat: point.lat, lng: point.lng };
+          }),
+          markers: (polygonData.markers || []).map(marker => {
+            return { lat: marker.lat, lng: marker.lng, color: marker.color || 'green' }; // Ensure color is defined
+          })
+        };
+      }
+      return polygonData;
+    });
 
     setSavedPolygons(formattedPolygons);
   }, []);
@@ -51,31 +61,45 @@ export default function Impact() {
       {/* Main Content */}
       <div className="flex-grow p-8 bg-gray-100">
         <h2 className="text-3xl font-bold mb-8 text-center">Impact Dashboard</h2>
-        
+
         <div className="impact-grid grid grid-cols-1 md:grid-cols-2 gap-8">
           {savedPolygons.length > 0 ? (
             savedPolygons.map((polygonData, index) => (
               <Link 
                 key={index} 
                 to={`/map-details/${index}`}  // Navigate to detailed map page
-                state={{ polygonData, metrics }}  // Pass only serializable data (polygon and metrics)
+                state={{ polygonData, metrics }}  // Pass polygon data and metrics
                 className="impact-section bg-white shadow-lg rounded-lg p-6 flex flex-col items-center hover:shadow-xl transition-shadow cursor-pointer"
               >
-                {/* Centered Title */}
                 <h3 className="text-lg font-bold mb-6 text-center">Restoration Area {index + 1}</h3>
 
-                {/* Map Section */}
                 <div className="map-container w-full h-[300px] mb-6 rounded-lg overflow-hidden border border-gray-200">
-                  <SmallMap
-                    savedPolygon={polygonData.polygon}
-                    plantMarkers={polygonData.markers}  // Ensure markers are passed here
-                    isViewOnly={true}
-                    mapHeight="100%"
-                    mapWidth="100%"
-                  />
+                  {polygonData.type === 'polygon_with_markers' ? (
+                    <SmallMap
+                      savedPolygon={polygonData.polygon || []}  // Ensure savedPolygon is an array
+                      plantMarkers={polygonData.markers || []}  // Ensure plantMarkers is an array
+                      isViewOnly={true}
+                      mapHeight="100%"
+                      mapWidth="100%"
+                    />
+                  ) : polygonData.type === 'polygon_with_inner_polygons' ? (
+                    <SmallMap
+                      savedPolygon={polygonData.mainPolygon || []}  // Ensure mainPolygon is an array
+                      innerPolygons={polygonData.innerPolygons || []}  // Ensure innerPolygons is an array
+                      isViewOnly={true}
+                      mapHeight="100%"
+                      mapWidth="100%"
+                    />
+                  ) : (
+                    <SmallMap
+                      savedPolygon={polygonData.polygon || []}  // Default polygon case
+                      isViewOnly={true}
+                      mapHeight="100%"
+                      mapWidth="100%"
+                    />
+                  )}
                 </div>
-                
-                {/* Stats Section (Lined Horizontally) */}
+
                 <div className="stats-container w-full flex justify-between items-center space-x-4">
                   {metrics.map((metric, i) => (
                     <div key={i} className="flex flex-col items-center text-center">

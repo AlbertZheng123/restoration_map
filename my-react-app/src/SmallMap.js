@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
+// Include Mapbox CSS
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
+
 export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarkers = [], isViewOnly = false, mapHeight = "400px" }) {
   const [localPlantMarkers, setLocalPlantMarkers] = useState(plantMarkers);
-  const [activeSpecies, setActiveSpecies] = useState(null); // Tracks active species (either plant or invasive)
+  const [activeSpecies, setActiveSpecies] = useState(null); 
 
-  // List of native and invasive plant species
   const nativePlantSpecies = [
     { name: 'Oak', color: 'green' },
     { name: 'Maple', color: 'green' },
@@ -27,76 +31,42 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
     setLocalPlantMarkers(plantMarkers);
   }, [plantMarkers]);
 
-  useEffect(() => {
-    console.log('Saved Polygon:', savedPolygon);
-    console.log('Plant Markers:', localPlantMarkers);
-  }, [savedPolygon, localPlantMarkers]);
-
   const handleMapClick = (e) => {
-    if (isViewOnly || !activeSpecies) {
-      return; // No markers placed if in view-only mode or no species is selected
-    }
+    if (isViewOnly || !activeSpecies) return;
 
     const newMarker = {
       lat: e.latlng.lat,
       lng: e.latlng.lng,
-      species: activeSpecies.name, // Save the species name
-      color: activeSpecies.color // Save the color (green for native, red for invasive)
+      species: activeSpecies.name,
+      color: activeSpecies.color
     };
 
     const updatedMarkers = [...localPlantMarkers, newMarker];
-    setLocalPlantMarkers(updatedMarkers); // Update local markers state
-
-    if (onSavePlantMarkers) {
-      onSavePlantMarkers(updatedMarkers); // Save the updated markers globally
-    }
+    setLocalPlantMarkers(updatedMarkers);
+    onSavePlantMarkers && onSavePlantMarkers(updatedMarkers);
   };
 
   const handleSelection = (type, speciesName) => {
-    if (isViewOnly) return; // Don't allow selection in view-only mode
+    if (isViewOnly) return;
 
-    if (type === 'native') {
-      const selectedSpecies = nativePlantSpecies.find((species) => species.name === speciesName);
-      setActiveSpecies(selectedSpecies);
-    } else if (type === 'invasive') {
-      const selectedSpecies = invasivePlantSpecies.find((species) => species.name === speciesName);
-      setActiveSpecies(selectedSpecies);
-    }
+    const speciesList = type === 'native' ? nativePlantSpecies : invasivePlantSpecies;
+    const selectedSpecies = speciesList.find(species => species.name === speciesName);
+    setActiveSpecies(selectedSpecies);
   };
 
-  // Validation function for LatLng objects (with lat/lng keys)
-  const isValidLatLngObject = (point) => {
-    const { lat, lng } = point || {};
-    const isValid = typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng);
-
-    if (!isValid) {
-      console.warn(`Invalid LatLng detected: Lat=${lat}, Lng=${lng}`);
-    }
-
-    return isValid;
-  };
-
-  // Filter invalid LatLng objects in the polygon
-  const validPolygon = savedPolygon ? savedPolygon.filter(isValidLatLngObject) : [];
-
-  // If no valid polygon points, log and avoid rendering polygon
-  useEffect(() => {
-    if (validPolygon.length === 0) {
-      console.warn('No valid polygon points to render.');
-    }
-  }, [validPolygon]);
-
-  // Create circle marker icon
   const createCircleMarker = (color) => {
     return L.divIcon({
       className: 'custom-div-icon',
-      html: `<div style="background-color:${color}; width:12px; height:12px; border-radius:50%;"></div>`,
-      iconSize: [12, 12]
+      html: `<div style="background-color:${color}; width:16px; height:16px; border-radius:50%; border: 2px solid ${color};"></div>`,
+      iconSize: [16, 16]
     });
   };
 
+  const validPolygon = savedPolygon ? savedPolygon.filter(point => point.lat && point.lng) : [];
+  const validMarkers = localPlantMarkers.filter(marker => marker.lat && marker.lng);
+
   return (
-    <div style={{ height: mapHeight, width: '100%' }}>  {/* Directly apply height here */}
+    <div style={{ height: mapHeight, width: '100%' }}>
       {!isViewOnly && (
         <div>
           <h3>Native Plant Species</h3>
@@ -124,32 +94,29 @@ export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarker
       )}
 
       <MapContainer style={{ height: '100%', width: "100%" }} center={[34.4269, -118.5754]} zoom={10}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      <TileLayer
+              attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+              maxZoom={22}
+              tileSize={512}
+              zoomOffset={-1}
+            />
 
-        {/* Render valid polygon */}
-        {validPolygon.length > 0 ? (
+        {validPolygon.length > 0 && (
           <>
             <Polygon positions={validPolygon.map(({ lat, lng }) => [lat, lng])} color="blue" />
-            <FocusPolygon polygon={validPolygon} /> {/* Define this component */}
+            <FocusMap polygon={validPolygon} markers={validMarkers} />
           </>
-        ) : (
-          <p>No valid polygon points to display.</p>
         )}
 
         {!isViewOnly && <MapInteractionHandler activeSpecies={activeSpecies} onMapClick={handleMapClick} />}
 
-        {/* Render plant markers */}
-        {localPlantMarkers.map((marker, index) => (
-          isValidLatLngObject(marker) && (
-            <Marker 
-              key={index} 
-              position={[marker.lat, marker.lng]} 
-              icon={createCircleMarker(marker.color)} // Use circle markers with species color
-            />
-          )
+        {validMarkers.map((marker, index) => (
+          <Marker 
+            key={index} 
+            position={[marker.lat, marker.lng]} 
+            icon={createCircleMarker(marker.color)}
+          />
         ))}
       </MapContainer>
     </div>
@@ -169,18 +136,20 @@ function MapInteractionHandler({ activeSpecies, onMapClick }) {
   return null;
 }
 
-// Component to focus the map on the polygon bounds
-function FocusPolygon({ polygon }) {
+// Focus the map on polygon and markers
+function FocusMap({ polygon, markers }) {
   const map = useMapEvents({});
 
   useEffect(() => {
-    if (polygon && polygon.length > 0) {
-      const bounds = L.latLngBounds(polygon.map(({ lat, lng }) => [lat, lng]));
-      map.fitBounds(bounds); // Adjust the map view to fit the polygon bounds
-    } else {
-      console.warn('FocusPolygon: No valid polygon points for fitting bounds.');
+    if ((polygon && polygon.length > 0) || (markers && markers.length > 0)) {
+      const allPoints = [
+        ...polygon.map(({ lat, lng }) => [lat, lng]), 
+        ...markers.map(({ lat, lng }) => [lat, lng])
+      ];
+      const bounds = L.latLngBounds(allPoints);
+      map.fitBounds(bounds);
     }
-  }, [polygon, map]);
+  }, [polygon, markers, map]);
 
   return null;
 }

@@ -1,12 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import L from 'leaflet';
-import "leaflet/dist/leaflet.css";  // Ensure Leaflet CSS is imported
+import "leaflet/dist/leaflet.css"; 
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
 import { EditControl } from "react-leaflet-draw";
-import { MapContainer, TileLayer, FeatureGroup, Polygon, Marker, useMapEvents } from 'react-leaflet'; 
+import { MapContainer, FeatureGroup, Polygon, Marker, TileLayer, useMapEvents } from 'react-leaflet';  // <-- Make sure to import useMapEvents
+import { useNavigate } from 'react-router-dom';
 
-// Component to handle map interactions based on Plant Mode
+// Include Mapbox CSS
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
+
 function MapInteractionHandler({ isPlantModeActive, onMapClick }) {
   useMapEvents({
     click: (e) => {
@@ -16,60 +21,82 @@ function MapInteractionHandler({ isPlantModeActive, onMapClick }) {
     },
   });
 
-  return null; // This component does not render anything
+  return null;
 }
 
 export default function MapComponent({ onSavePolygon, savedPolygon, isPolygonDisplayed, plantMarkers = [], onSavePlantMarkers, isPlantModeActive }) {
   const featureGroupRef = useRef(null);
   const [localPlantMarkers, setLocalPlantMarkers] = useState(plantMarkers);
+  const navigate = useNavigate();  // For navigation
 
-  // Sync global plantMarkers with local state whenever props update
   useEffect(() => {
     setLocalPlantMarkers(plantMarkers);
   }, [plantMarkers]);
 
-  // Custom plant icon (make sure the path is correct)
   const plantIcon = new L.Icon({
-    iconUrl: '/plant_clip_art.jpg', // Path to your custom image
-    iconSize: [32, 32], // Size of the icon
-    iconAnchor: [16, 32], // Anchor the icon (base of the marker)
-    popupAnchor: [0, -32], // Where the popup should open (relative to the icon)
+    iconUrl: '/plant_clip_art.jpg',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 
-  // Handle polygon creation
   const handleCreated = (e) => {
     const layer = e.layer;
     const latlngs = layer.getLatLngs();
-    console.log('Polygon created with these points (full structure):', latlngs);
-    onSavePolygon(latlngs[0]); // Pass the outermost polygon
+    onSavePolygon(latlngs[0]);
   };
 
-  // Handle map clicks to place a plant marker if plant mode is active
   const handleMapClick = (e) => {
-    console.log("Map clicked at coordinates: ", e.latlng);
-
     const newMarker = {
       lat: e.latlng.lat,
       lng: e.latlng.lng,
     };
-
     const updatedMarkers = [...localPlantMarkers, newMarker];
-    setLocalPlantMarkers(updatedMarkers); // Update local markers state
-    onSavePlantMarkers(updatedMarkers); // Save the updated markers globally
+    setLocalPlantMarkers(updatedMarkers);
+    onSavePlantMarkers(updatedMarkers);
+  };
 
-    console.log("New marker placed at: ", newMarker);
+  // Function to save polygon WITHOUT markers and redirect to Polygon Plot Page
+  const savePolygonWithoutMarkersAndRedirect = () => {
+    try {
+      let existingPolygons = localStorage.getItem('savedPolygonData');
+      existingPolygons = existingPolygons ? JSON.parse(existingPolygons) : [];
+
+      if (!Array.isArray(existingPolygons)) {
+        existingPolygons = [];
+      }
+
+      const polygonWithoutMarkers = {
+        type: 'polygon_with_inner_polygons',  // This polygon is for inner polygons
+        mainPolygon: savedPolygon,  
+        innerPolygons: [],  // Initialize with no inner polygons
+      };
+
+      existingPolygons.push(polygonWithoutMarkers);
+
+      localStorage.setItem('savedPolygonData', JSON.stringify(existingPolygons));
+
+      console.log('Polygon without markers saved!', polygonWithoutMarkers); // For debugging
+      alert('Polygon without markers saved! Now plot inner polygons.');
+
+      // Redirect to the Polygon Plot page
+      navigate('/polygon-plot', { state: { polygon: savedPolygon } });
+    } catch (error) {
+      console.error("Error saving polygon without markers:", error);
+    }
   };
 
   return (
-    <div style={{ height: '500px', width: '100%' }}> {/* Make sure the container has a height */}
+    <div style={{ height: '500px', width: '100%' }}>
       <MapContainer 
         center={[34.4269, -118.5754]} 
         zoom={20} 
-        style={{ height: "100%", width: "100%" }} // Map needs to have height and width
+        maxZoom={22}
+        style={{ height: "100%", width: "100%" }}
       >
         <MapInteractionHandler 
           isPlantModeActive={isPlantModeActive} 
-          onMapClick={handleMapClick} // Pass map click handler to the interaction handler
+          onMapClick={handleMapClick}
         />
 
         <FeatureGroup ref={featureGroupRef}>
@@ -97,24 +124,35 @@ export default function MapComponent({ onSavePolygon, savedPolygon, isPolygonDis
         </FeatureGroup>
 
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+          url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+          maxZoom={22}
+          tileSize={512}
+          zoomOffset={-1}
         />
 
         {isPolygonDisplayed && savedPolygon && (
           <Polygon positions={savedPolygon} color="blue" />
         )}
 
-        {/* Use custom plant icon for each marker */}
         {localPlantMarkers.map((marker, index) => (
           <Marker 
             key={index} 
             position={[marker.lat, marker.lng]} 
-            icon={plantIcon} // Apply the custom icon
+            icon={plantIcon}
           />
         ))}
       </MapContainer>
+
+      {/* Add button to save polygon without markers and redirect */}
+      <div style={{ marginTop: '10px' }}>
+        <button 
+          onClick={savePolygonWithoutMarkersAndRedirect}
+          style={{ padding: '10px', backgroundColor: 'orange', color: 'white', border: 'none', cursor: 'pointer' }}
+        >
+          Plot Polygons Within
+        </button>
+      </div>
     </div>
   );
 }
-

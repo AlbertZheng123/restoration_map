@@ -12,37 +12,52 @@ export default function SmallMapPage({ savedPolygon, plantMarkers, onSavePlantMa
     console.log("Plant Mode toggled. Current status:", !isPlantModeActive ? 'Active' : 'Inactive');
   };
 
-  // Utility function to validate LatLng
   const isValidLatLng = (lat, lng) => {
     const isValid = typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng);
-    if (!isValid) {
-      console.warn(`Invalid LatLng detected: lat=${lat}, lng=${lng}`);  // Debugging Warning
-    }
     return isValid;
   };
 
   const formatBoundaries = (polygon) => {
-    console.log("Formatting Polygon Data:", polygon); // Debugging Log
     return polygon.map(point => {
       if (isValidLatLng(point.lat, point.lng)) {
         return [point.lat, point.lng];
-      } else {
-        console.warn("Invalid polygon point detected and ignored:", point); // Warn about invalid points
-        return null; // Return null for invalid points
       }
-    }).filter(Boolean); // Filter out null values
+      return null;
+    }).filter(Boolean);
   };
 
   const formatPlants = (markers) => {
-    console.log("Formatting Plant Markers:", markers); // Debugging Log
     return markers.map(marker => {
       if (isValidLatLng(marker.lat, marker.lng)) {
         return [marker.lat, marker.lng];
-      } else {
-        console.warn("Invalid marker detected and ignored:", marker); // Warn about invalid markers
-        return null; // Return null for invalid markers
       }
-    }).filter(Boolean); // Filter out null values
+      return null;
+    }).filter(Boolean);
+  };
+
+  // Function to save polygon and marker data to localStorage
+  const savePolygonWithMarkers = () => {
+    try {
+      let existingPolygons = localStorage.getItem('savedPolygonData');
+      existingPolygons = existingPolygons ? JSON.parse(existingPolygons) : [];
+
+      if (!Array.isArray(existingPolygons)) {
+        existingPolygons = [];
+      }
+
+      const polygonWithMarkers = {
+        type: 'polygon_with_markers',  // Identifier for marker polygons
+        polygon: savedPolygon,
+        markers: plantMarkers,
+      };
+
+      localStorage.setItem('savedPolygonData', JSON.stringify([...existingPolygons, polygonWithMarkers]));
+
+      console.log('Polygon with markers saved!', polygonWithMarkers);
+      alert('Polygon with markers saved!');
+    } catch (error) {
+      console.error("Error saving polygon with markers:", error);
+    }
   };
 
   const handleSavePolygonAndRedirect = () => {
@@ -62,21 +77,16 @@ export default function SmallMapPage({ savedPolygon, plantMarkers, onSavePlantMa
 
     axios.post('http://localhost:8000/api/predict-plant-growth/', newSavedPolygon)
       .then(response => {
-        console.log("Response from backend:", response.data);
         alert('Polygon and markers sent to backend successfully!');
 
-        // Save the polygon data locally for Impact page use
-        const existingPolygons = JSON.parse(localStorage.getItem('savedPolygons')) || [];
-        existingPolygons.push({ polygon: formattedBoundaries, markers: formattedPlants });
-        localStorage.setItem('savedPolygons', JSON.stringify(existingPolygons));
+        savePolygonWithMarkers(); // Save polygons with markers locally
 
-        // Redirect to the biomass overlay page
         const { overlayImageURL } = response.data;
         navigate('/biomass-overlay', { state: { imageURL: overlayImageURL, polygon: formattedBoundaries } });
       })
       .catch(error => {
         console.error("Error submitting polygon and markers to backend:", error);
-        alert('Failed to send data to the backend. Check console for more details.');
+        alert('Failed to send data to the backend.');
       });
   };
 
@@ -86,9 +96,8 @@ export default function SmallMapPage({ savedPolygon, plantMarkers, onSavePlantMa
         <h1>Polygon Focus Map</h1>
       </header>
 
-      {/* Map Container with Fixed Height */}
+      {/* Map Container */}
       <div className="small-map-container" style={{ height: '500px', width: '100%' }}>
-        {/* Button to toggle plant mode */}
         <button 
           onClick={togglePlantMode} 
           style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000 }}
@@ -96,16 +105,14 @@ export default function SmallMapPage({ savedPolygon, plantMarkers, onSavePlantMa
           {isPlantModeActive ? 'Deactivate Plant Mode' : 'Activate Plant Mode'}
         </button>
 
-        {/* Render the small map with the polygon and plant-plotting functionality */}
         <SmallMap 
-          savedPolygon={savedPolygon.filter(point => point && isValidLatLng(point.lat, point.lng))}  // Validate coordinates
+          savedPolygon={savedPolygon.filter(point => point && isValidLatLng(point.lat, point.lng))}  
           isPlantModeActive={isPlantModeActive} 
-          plantMarkers={plantMarkers.filter(marker => marker && isValidLatLng(marker.lat, marker.lng))}  // Validate markers
+          plantMarkers={plantMarkers.filter(marker => marker && isValidLatLng(marker.lat, marker.lng))}  
           onSavePlantMarkers={onSavePlantMarkers} 
         />
       </div>
 
-      {/* Button to Save Polygon and Markers - Positioned Below the Map */}
       <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <button 
           onClick={handleSavePolygonAndRedirect} 

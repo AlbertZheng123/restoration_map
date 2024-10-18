@@ -3,20 +3,19 @@ import { MapContainer, TileLayer, Polygon, ImageOverlay, useMap } from 'react-le
 import L from 'leaflet';
 import { useLocation } from 'react-router-dom';
 
+const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
+
 export default function BiomassOverlayPage() {
   const location = useLocation();
-  const { polygon, imageURL } = location.state || {}; // Get the polygon and image URL from state
+  const { polygon, imageURL } = location.state || {}; 
   const mapRef = useRef(null);
 
-  const correctedOverlayImageURL = `http://localhost:8000/media/generated/biomass_model.png`; 
+  const correctedOverlayImageURL = `http://localhost:8000/media/generated/biomass_model.png`;
 
-  // Function to calculate the smallest square bounding box for the polygon
   const calculateBottomAlignedBoundingBox = (polygon) => {
-    console.log("Calculating Bounding Box for Polygon:", polygon);  // Debugging Log
     let minLat = polygon[0][0], maxLat = polygon[0][0];
     let minLng = polygon[0][1], maxLng = polygon[0][1];
 
-    // Find min/max lat and lng from the polygon
     polygon.forEach(([lat, lng]) => {
       if (lat < minLat) minLat = lat;
       if (lat > maxLat) maxLat = lat;
@@ -24,18 +23,13 @@ export default function BiomassOverlayPage() {
       if (lng > maxLng) maxLng = lng;
     });
 
-    // Calculate height (lat) and width (lng) distances in kilometers
     const latDiffKm = (maxLat - minLat) * 111.32;
     const lngDiffKm = (maxLng - minLng) * (111.32 * Math.cos(((minLat + maxLat) / 2) * (Math.PI / 180)));
 
-    // Use the maximum distance to form a square
     const maxDiffKm = Math.max(latDiffKm, lngDiffKm);
-
-    // Convert back the max difference to latitude and longitude degrees
     const maxDiffLat = maxDiffKm / 111.32;
     const maxDiffLng = maxDiffKm / (111.32 * Math.cos(((minLat + maxLat) / 2) * (Math.PI / 180)));
 
-    // Adjust the square bounding box with bottom alignment
     const squareMinLat = minLat;
     const squareMaxLat = minLat + maxDiffLat;
     const squareMinLng = (minLng + maxLng) / 2 - maxDiffLng / 2;
@@ -47,17 +41,14 @@ export default function BiomassOverlayPage() {
   const isValidLatLng = (lat, lng) => {
     const isValid = typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng);
     if (!isValid) {
-      console.warn(`Invalid LatLng detected in polygon: lat=${lat}, lng=${lng}`);  // Debugging Warning
+      console.warn(`Invalid LatLng detected in polygon: lat=${lat}, lng=${lng}`);
     }
     return isValid;
   };
 
-  // Filter out invalid polygon points
   const validPolygon = polygon ? polygon.filter(point => isValidLatLng(point[0], point[1])) : null;
-
   const squareBounds = validPolygon ? calculateBottomAlignedBoundingBox(validPolygon) : null;
 
-  // Fit map to bounds function
   function FitBounds({ polygon }) {
     const map = useMap();
     useEffect(() => {
@@ -74,29 +65,28 @@ export default function BiomassOverlayPage() {
     <div style={{ height: '100vh', width: '100%', position: 'relative' }}>
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        center={validPolygon.length > 0 ? validPolygon[0] : [34.427, -118.57]}  // Fallback if no valid polygon points
+        center={validPolygon.length > 0 ? validPolygon[0] : [34.427, -118.57]}  
         zoom={13}
         maxZoom={18}
-        whenCreated={(mapInstance) => (mapRef.current = mapInstance)} // Store map instance in the ref
+        whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+         <TileLayer
+  attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+  url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+  maxZoom={22}  // Ensure maxZoom is set
+  tileSize={512}  // Increase tile size for higher zoom resolution
+  zoomOffset={-1}  // Adjust offset for better high-zoom performance
+/>
 
-        {/* Render the valid polygon */}
         {validPolygon && <Polygon positions={validPolygon} color="blue" />}
-
-        {/* Fit the map to the polygon's bounds */}
         <FitBounds polygon={validPolygon} />
 
-        {/* Render the image overlay within square bounds */}
         {squareBounds && (
           <ImageOverlay
             id="overlay-image"
-            url={correctedOverlayImageURL} // Use the image URL from the backend
+            url={correctedOverlayImageURL}
             bounds={squareBounds}
-            opacity={0.6} // Adjust the opacity of the overlay image
+            opacity={0.6}
             interactive={false}
           />
         )}

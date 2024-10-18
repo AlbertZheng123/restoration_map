@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MapContainer, TileLayer, Polygon, Marker, ImageOverlay, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polygon, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { FaLeaf, FaTree, FaRecycle, FaWater } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+
+// Include Mapbox CSS
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
 
 const iconMap = {
   'Biomass Production': FaLeaf,
@@ -15,27 +20,41 @@ const iconMap = {
   'Water Retention': FaWater,
 };
 
-const createIcon = (color) => {
-  return L.divIcon({
-    className: 'custom-icon',
-    html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
-  });
-};
-
 export default function MapDetails() {
   const location = useLocation();
   const { polygonData, metrics } = location.state || {};  
   
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const polygonPositions = polygonData?.polygon?.map(p => [p.lat, p.lng]) || [];
+  // Handle both polygon with inner polygons and polygons with markers
+  const polygonPositions = polygonData?.type === 'polygon_with_markers' 
+    ? polygonData.polygon.map(p => [p.lat, p.lng])  // Extract positions from `polygon`
+    : polygonData?.mainPolygon?.map(p => [p.lat, p.lng]) || [];
+
   const markers = polygonData?.markers || [];
+
+  // Fallback center if no positions are available
+  const defaultCenter = [34.4269, -118.5754];
+
+  // Log polygon data and positions for debugging
+  useEffect(() => {
+    console.log('Polygon Data passed to MapDetails:', polygonData);
+    console.log('Polygon Positions:', polygonPositions);
+    console.log('Markers:', markers); // Log markers for debugging
+
+    if (polygonPositions.length === 0) {
+      console.warn('Using default center because polygonPositions is empty');
+    } else {
+      console.log('Using polygon positions for map center and bounds');
+    }
+  }, [polygonData, polygonPositions, markers]);
 
   function FitBounds({ positions }) {
     const map = useMap();
     useEffect(() => {
       if (positions && positions.length > 0) {
         const bounds = L.latLngBounds(positions);
+        console.log('Fitting map to bounds:', bounds); // Log bounds for debugging
         map.fitBounds(bounds, { padding: [50, 50] });
       }
     }, [positions, map]);
@@ -43,50 +62,95 @@ export default function MapDetails() {
     return null;
   }
 
-  useEffect(() => {
-    console.log('Polygon Data passed:', polygonData);
-    console.log('Markers:', markers);
-  }, [polygonData, markers]);
-
   return (
     <div className="map-details-page p-8 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold mb-8 text-center">Detailed Map View</h2>
 
       <div className="map-container w-full h-[500px] mb-8 rounded-lg overflow-hidden border border-gray-200">
-        {polygonPositions.length > 0 ? (
+        {/* Check for the type of polygon and render accordingly */}
+        {polygonData?.type === 'polygon_with_inner_polygons' ? (
           <MapContainer
             style={{ height: '100%', width: '100%' }}
-            center={polygonPositions[0]} 
+            center={polygonPositions[0] || defaultCenter}  // Ensure valid center
             zoom={13}
+            maxZoom={22}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+              maxZoom={22}
+              tileSize={512}
+              zoomOffset={-1}
             />
 
-            <Polygon positions={polygonPositions} color="blue" />
+            {/* Display the main polygon */}
+            <Polygon positions={polygonPositions} color="black" fillOpacity={0} />
 
-            <FitBounds positions={polygonPositions} />
-
-            {polygonData.imageURL && (
-              <ImageOverlay
-                url={polygonData.imageURL}
-                bounds={L.latLngBounds(polygonPositions)}  
-                opacity={0.6}
-              />
-            )}
-
-            {markers.map((marker, i) => (
-              <Marker 
-                key={i} 
-                position={[marker.lat, marker.lng]} 
-                icon={createIcon(marker.color)}
+            {/* Display inner polygons */}
+            {polygonData.innerPolygons.map((inner, i) => (
+              <Polygon
+                key={i}
+                positions={inner.coords.map(p => [p.lat, p.lng])}
+                color="black"
+                fillOpacity={0.5}
+                fillColor={inner.plants > 60 ? 'darkgreen' : inner.plants > 40 ? 'green' : inner.plants > 20 ? 'greenyellow' : 'yellow'}
               />
             ))}
 
+            <FitBounds positions={polygonPositions} />
+          </MapContainer>
+        ) : polygonData?.type === 'polygon_with_markers' ? (
+          <MapContainer
+            style={{ height: '100%', width: '100%' }}
+            center={polygonPositions[0] || defaultCenter}  // Ensure valid center
+            zoom={13}
+            maxZoom={22}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+              maxZoom={22}
+              tileSize={512}
+              zoomOffset={-1}
+            />
+
+            {/* Display markers if they exist */}
+            {markers.length > 0 && markers.map((marker, i) => (
+              <Marker 
+                key={i} 
+                position={[marker.lat, marker.lng]} 
+                icon={L.divIcon({
+                  className: 'custom-icon',
+                  html: `<div style="background-color:${marker.color}; width: 20px; height: 20px; border-radius: 50%;"></div>`,
+                })}
+              />
+            ))}
+
+            {/* Display the main polygon */}
+            <Polygon positions={polygonPositions} color="black" fillOpacity={0} />
+
+            <FitBounds positions={polygonPositions} />
           </MapContainer>
         ) : (
-          <p>Map data is missing or not available</p>
+          <MapContainer
+            style={{ height: '100%', width: '100%' }}
+            center={polygonPositions[0] || defaultCenter}  // Ensure valid center
+            zoom={13}
+            maxZoom={22}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> contributors'
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${mapboxAccessToken}`}
+              maxZoom={22}
+              tileSize={512}
+              zoomOffset={-1}
+            />
+
+            {/* Display the main polygon as a fallback */}
+            <Polygon positions={polygonPositions} color="black" fillOpacity={0} />
+
+            <FitBounds positions={polygonPositions} />
+          </MapContainer>
         )}
       </div>
 

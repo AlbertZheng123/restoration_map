@@ -9,6 +9,7 @@ import MapDetails from './MapDetails';  // Import the MapDetails component
 import SavedPolygonsPage from './SavedPolygonsPage'; // Import the new Saved Polygons Page
 import Landing from './Landing'; // Import the Landing Page
 import BiomassOverlayPage from './BiomassOverlayPage';
+import PolygonPlotPage from './PolygonPlotPage';
 
 function App() {
   const [savedPolygon, setSavedPolygon] = useState(null); // Global state to store the polygon
@@ -56,6 +57,7 @@ function App() {
         <Route path="/landing" element={<Landing />} />
         <Route path="/biomass-overlay" element={<BiomassOverlayPage />} /> {/* Add new route */}
         <Route path="/biomass-overlay" element={<BiomassOverlayPage />} />
+        <Route path="/polygon-plot" element={<PolygonPlotPage />} />  {/* New route for plotting inner polygons */}
       </Routes>
     </Router>
   );
