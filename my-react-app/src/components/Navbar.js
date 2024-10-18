@@ -36,6 +36,7 @@ const CollapsibleSidebar = () => {
                             <li><a href="#faq" className="block py-2 hover:bg-gray-700 rounded">FAQ</a></li>
                             <li><a href="/test" className="block py-2 hover:bg-gray-700 rounded">Test</a></li>
                             <li><a href="/login" className="block py-2 hover:bg-gray-700 rounded">Login</a></li>
+                            <li><a href="/new-screen" className="block py-2 hover:bg-gray-700 rounded">New Screen</a></li> {/* New item */}
                         </ul>
                     </nav>
                     <div className="p-4">
