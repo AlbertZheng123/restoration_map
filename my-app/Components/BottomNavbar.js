@@ -2,9 +2,9 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Feather';
 import Home from './Home';
-import Map from './Map';
+import MapComponent from './Map';
 import Impact from './Impact';
-import tw from 'twrnc';
+import PlantDatabase from './PlantDatabase'; // Assuming PlantDatabase is a react-native component too
 
 const Tab = createBottomTabNavigator();
 
@@ -20,6 +20,8 @@ const BottomNavBar = () => {
             iconName = 'map';
           } else if (route.name === 'Impact') {
             iconName = 'info';
+          } else if (route.name === 'Plants') {
+            iconName = 'inbox';
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
@@ -30,8 +32,9 @@ const BottomNavBar = () => {
       })}
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Map" component={Map} />
+      <Tab.Screen name="Map" component={MapComponent} />
       <Tab.Screen name="Impact" component={Impact} />
+      <Tab.Screen name="Plants" component={PlantDatabase} />
     </Tab.Navigator>
   );
 };

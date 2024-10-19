@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "expo": "~51.0.28",
@@ -19,7 +20,9 @@
     "nativewind": "^2.0.11",
     "react": "18.2.0",
     "react-native": "0.74.5",
+    "react-native-async-storage": "^0.0.1",
     "react-native-maps": "^1.18.2",
+    "react-native-mmkv": "^2.12.2",
     "react-native-navigation": "^7.40.3",
     "react-native-progress": "^5.0.1",
     "react-native-safe-area-context": "^4.11.1",
