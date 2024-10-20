@@ -1,100 +1,71 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Picker, Alert } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import tw from 'twrnc';
 
-const nativePlantSpecies = [
-  { name: 'Oak', color: 'green' },
-  { name: 'Maple', color: 'green' },
-  { name: 'Pine', color: 'green' },
-  { name: 'Birch', color: 'green' },
-  { name: 'Cedar', color: 'green' },
-];
+export default function SmallMap({ route, savedPolygon = [], plantMarkers = [], isViewOnly = false, mapHeight = "400px" }) {
+  // Safely extract parameters from route (if route exists)
+  const polygonData = route?.params?.savedPolygon || savedPolygon;
+  const markerData = route?.params?.plantMarkers || plantMarkers;
 
-const invasivePlantSpecies = [
-  { name: 'Kudzu', color: 'red' },
-  { name: 'Japanese Knotweed', color: 'red' },
-  { name: 'Garlic Mustard', color: 'red' },
-  { name: 'Purple Loosestrife', color: 'red' },
-  { name: 'Water Hyacinth', color: 'red' },
-];
+  // Log the received polygon and markers
+  console.log("Rendering SmallMap with Polygon: ", polygonData);
+  console.log("Rendering SmallMap with Markers: ", markerData);
 
-export default function SmallMap({ savedPolygon, onSavePlantMarkers, plantMarkers = [], isViewOnly = false, mapHeight = "400px" }) {
-  const [localPlantMarkers, setLocalPlantMarkers] = useState(plantMarkers);
-  const [activeSpecies, setActiveSpecies] = useState(null); // Tracks active species (either plant or invasive)
-
-  useEffect(() => {
-    setLocalPlantMarkers(plantMarkers);
-  }, [plantMarkers]);
-
-  const handleMapClick = useCallback((e) => {
-    if (isViewOnly || !activeSpecies) return;
-
-    const newMarker = {
-      latitude: e.nativeEvent.coordinate.latitude,
-      longitude: e.nativeEvent.coordinate.longitude,
-      species: activeSpecies.name,
-      color: activeSpecies.color,
+  // Calculate the center of the polygon for map centering
+  const calculateCenter = (coordinates) => {
+    if (coordinates.length === 0) return { latitude: 37.78825, longitude: -122.4324 }; // Default location
+    let latSum = 0, lngSum = 0;
+    coordinates.forEach(coord => {
+      latSum += coord.latitude;
+      lngSum += coord.longitude;
+    });
+    return {
+      latitude: latSum / coordinates.length,
+      longitude: lngSum / coordinates.length,
     };
+  };
 
-    const updatedMarkers = [...localPlantMarkers, newMarker];
-    setLocalPlantMarkers(updatedMarkers);
-
-    if (onSavePlantMarkers) {
-      onSavePlantMarkers(updatedMarkers);
-    }
-  }, [activeSpecies, isViewOnly, localPlantMarkers, onSavePlantMarkers]);
+  // Set the initial region based on the center of the polygon
+  const initialRegion = polygonData.length > 0 ? {
+    ...calculateCenter(polygonData),
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  } : {
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  };
 
   return (
     <View style={[tw`flex-1`, { height: mapHeight }]}>
-      {!isViewOnly && (
-        <View style={tw`p-4`}>
-          <Text style={tw`mb-2 font-bold`}>Native Plant Species</Text>
-          <Picker selectedValue={activeSpecies?.name} onValueChange={(itemValue) => {
-            const selectedSpecies = nativePlantSpecies.find(species => species.name === itemValue) || invasivePlantSpecies.find(species => species.name === itemValue);
-            setActiveSpecies(selectedSpecies);
-          }}>
-            <Picker.Item label="Select Native Plant" value="" />
-            {nativePlantSpecies.map((species, index) => (
-              <Picker.Item key={index} label={species.name} value={species.name} />
-            ))}
-          </Picker>
+      {polygonData.length > 0 || markerData.length > 0 ? (
+        <MapView
+          style={tw`flex-1`}
+          initialRegion={initialRegion}
+          scrollEnabled={!isViewOnly}
+          zoomEnabled={!isViewOnly}
+        >
+          {/* Render polygon if available */}
+          {polygonData.length > 0 && (
+            <Polygon
+              coordinates={polygonData}
+              fillColor="rgba(0, 0, 255, 0.3)"
+              strokeColor="rgba(0, 0, 255, 0.5)"
+            />
+          )}
 
-          <Text style={tw`mt-4 mb-2 font-bold`}>Invasive Plant Species</Text>
-          <Picker selectedValue={activeSpecies?.name} onValueChange={(itemValue) => {
-            const selectedSpecies = nativePlantSpecies.find(species => species.name === itemValue) || invasivePlantSpecies.find(species => species.name === itemValue);
-            setActiveSpecies(selectedSpecies);
-          }}>
-            <Picker.Item label="Select Invasive Plant" value="" />
-            {invasivePlantSpecies.map((species, index) => (
-              <Picker.Item key={index} label={species.name} value={species.name} />
-            ))}
-          </Picker>
-          <Text>Current Selected Species: {activeSpecies ? activeSpecies.name : 'None'}</Text>
-        </View>
+          {/* Render markers if available */}
+          {markerData.map((marker, index) => (
+            <Marker key={index} coordinate={marker} />
+          ))}
+        </MapView>
+      ) : (
+        <Text style={tw`text-center text-gray-500 p-4`}>
+          No polygon or markers to display.
+        </Text>
       )}
-
-      <MapView
-        style={tw`flex-1`}
-        initialRegion={{
-          latitude: 34.4269,
-          longitude: -118.5754,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        }}
-        onPress={handleMapClick} // Adds marker on map press
-      >
-        {savedPolygon && savedPolygon.length > 0 && (
-          <Polygon coordinates={savedPolygon} fillColor="rgba(0, 0, 255, 0.3)" strokeColor="rgba(0, 0, 255, 0.5)" />
-        )}
-        {localPlantMarkers.map((marker, index) => (
-          <Marker
-            key={index}
-            coordinate={{ latitude: marker.lat, longitude: marker.lng }}
-            pinColor={marker.color}
-          />
-        ))}
-      </MapView>
     </View>
-  );
+  )
 }

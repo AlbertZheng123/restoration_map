@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import Home from './Home';
 import MapComponent from './Map';
 import Impact from './Impact';
-import PlantDatabase from './PlantDatabase'; // Assuming PlantDatabase is a react-native component too
+import PlantDatabase from './PlantDatabase';
 
 const Tab = createBottomTabNavigator();
 

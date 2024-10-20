@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
-import * as Location from 'expo-location';
 import tw from 'twrnc';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // AsyncStorage for saving data
+import * as Location from 'expo-location';  // Use Expo's Location API
 
 export default function MapComponent() {
-  const [location, setLocation] = useState(null);
   const [markerCoords, setMarkerCoords] = useState([]);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const navigation = useNavigation();
+
+  const getCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission denied', 'Location permission is required to use the map.');
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    setCurrentLocation({ latitude, longitude });
+  };
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
-    })();
+    getCurrentLocation();  // Fetch user's location when the component mounts
   }, []);
 
   const handleMapPress = (e) => {
@@ -29,50 +35,74 @@ export default function MapComponent() {
     setMarkerCoords([...markerCoords, newMarker]);
   };
 
-  const handleSavePolygon = () => {
+  const handleSavePolygon = async () => {
     if (markerCoords.length >= 3) {
-      Alert.alert("Polygon Saved", "Polygon has been saved with the current markers.");
+      // Log the current polygon data to verify it's correct
+      console.log("Saving polygon data: ", markerCoords);
+  
+      try {
+        const savedData = {
+          polygon: markerCoords,
+          markers: markerCoords,
+        };
+        // Retrieve any existing polygons
+        const storedPolygons = JSON.parse(await AsyncStorage.getItem('savedPolygons')) || [];
+        
+        // Log existing polygons before saving new data
+        console.log("Existing polygons in AsyncStorage: ", storedPolygons);
+        
+        const updatedPolygons = [...storedPolygons, savedData];
+        
+        // Save the updated polygon list to AsyncStorage
+        await AsyncStorage.setItem('savedPolygons', JSON.stringify(updatedPolygons));
+        
+        console.log("Updated polygons saved to AsyncStorage: ", updatedPolygons);
+        
+        // Navigate to SmallMap and pass the savedPolygon and markers
+        navigation.navigate('SmallMap', { savedPolygon: markerCoords, plantMarkers: markerCoords });
+      } catch (error) {
+        Alert.alert('Error', 'Failed to save the polygon.');
+        console.error("Error saving to AsyncStorage: ", error);
+      }
     } else {
-      Alert.alert("Polygon Error", "A polygon requires at least three points.");
+      Alert.alert('Error', 'A polygon requires at least 3 points.');
     }
   };
-
+  
   const clearMarkers = () => {
     setMarkerCoords([]);
   };
 
-  if (!location) {
-    return (
-      <View style={tw`flex-1 justify-center items-center`}>
-        <Text>Waiting for location...</Text>
-        {errorMsg && <Text>{errorMsg}</Text>}
-      </View>
-    );
-  }
+  const defaultRegion = currentLocation
+    ? {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }
+    : {
+        latitude: 37.78825,  // Default fallback location (San Francisco)
+        longitude: -122.4324,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      };
 
   return (
     <View style={tw`flex-1`}>
       <MapView
         style={tw`w-full h-full`}
-        initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
+        initialRegion={defaultRegion}
         onPress={handleMapPress}
+        showsUserLocation={true} // Show user's location on the map
       >
         {markerCoords.map((marker, index) => (
           <Marker key={index} coordinate={marker} />
         ))}
         {markerCoords.length >= 3 && (
-          <Polygon
-            coordinates={markerCoords}
-            fillColor="rgba(100, 100, 200, 0.3)"
-            strokeColor="rgba(0, 0, 255, 0.5)"
-          />
+          <Polygon coordinates={markerCoords} fillColor="rgba(100, 100, 200, 0.3)" />
         )}
       </MapView>
+
       <View style={tw`absolute bottom-0 left-0 right-0 p-4 bg-white`}>
         <View style={tw`flex-row justify-around`}>
           <TouchableOpacity onPress={handleSavePolygon} style={tw`bg-blue-600 p-2 rounded`}>
