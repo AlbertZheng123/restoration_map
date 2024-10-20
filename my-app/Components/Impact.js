@@ -1,39 +1,3 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, ScrollView } from 'react-native';
-// import tw from 'twrnc';
-
-// const Impact = ({ savedPolygons = [] }) => {
-//   return (
-//     <ScrollView style={tw`flex-1 bg-gray-100`}>
-//       <View style={tw`items-center p-8`}>
-//         <Text style={tw`text-3xl font-bold mb-8 text-center`}>Impact Dashboard</Text>
-
-//         {savedPolygons.length ? (
-//           savedPolygons.map((polygon, index) => (
-//             <View
-//               key={index}
-//               style={tw`bg-white shadow-lg rounded-lg p-6 mb-6 w-11/12`}
-//             >
-//               <Text style={tw`text-lg font-bold text-center mb-6`}>
-//                 Restoration Area {index + 1}
-//               </Text>
-
-//               <View style={tw`flex-row justify-between`}>
-//                 <Text style={tw`text-center text-gray-700`}>
-//                   {polygon.length} Points Mapped
-//                 </Text>
-//               </View>
-//             </View>
-//           ))
-//         ) : (
-//           <Text style={tw`text-center text-gray-500`}>No polygons have been saved yet.</Text>
-//         )}
-//       </View>
-//     </ScrollView>
-//   );
-// };
-
-// export default Impact;import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import tw from 'twrnc';
 

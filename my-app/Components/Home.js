@@ -1,17 +1,38 @@
-// components/Home.js
-import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import tw from 'twrnc';
 
 const Home = () => {
+  const [isLoading, setIsLoading] = useState(true); // Initialize all hooks at the top level
   const [activeIcon, setActiveIcon] = useState(null);
+
+  // Simulate loading with a useEffect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Trigger after 2 seconds
+
+    return () => clearTimeout(timer); // Clean-up function to clear timer
+  }, []);
+
+  // Icon and description data
   const iconData = [
     { icon: 'user', label: 'Profile', description: 'Manage your personal profile and settings.' },
     { icon: 'settings', label: 'Settings', description: 'Customize your experience and make it unique to your needs.' },
     { icon: 'activity', label: 'Activity', description: 'Track your activity and review your engagement stats.' },
     { icon: 'layers', label: 'Layers', description: 'Explore and manage your data with a comprehensive layer view.' }
   ];
+
+  // Conditional rendering controlled by isLoading state
+  if (isLoading) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-gray-900`}>
+        <ActivityIndicator size="large" color="#FFFFFF" />
+        <Text style={tw`text-white mt-4`}>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={tw`flex-1 bg-gray-900`}>
