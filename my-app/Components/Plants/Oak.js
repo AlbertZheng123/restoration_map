@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Image } from 'react-native';
-import tw from 'twrnc'; // Tailwind for styling
+import React from 'react';
+import Plant from './Plant';
 
 function OakPlant() {
-    return (
-        <View>
-            <Text style={tw`text-center font-bold text-3xl mb-4`}>Oak Info</Text>
-        </View>
-    )
+  return (
+    <Plant
+      imageSrc={require('../../assets/oakplant.png')} // Update with the actual path to the oak plant image
+      name="Oak Plant"
+      terrain="Loamy, well-drained soil"
+      terrainExample="Common in: Deciduous forests"
+      growthDuration="20-30 years to maturity"
+      growthExample="Maturity Time"
+      description="Oak trees are strong, long-lived, and known for their sturdy wood and acorns."
+      descriptionExample="Characteristics"
+      usageCount={10} // Example usage count
+      usageExample="Times planted"
+    />
+  );
 }
 
 export default OakPlant;
