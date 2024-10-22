@@ -103,12 +103,12 @@ export default function MapComponent() {
         )}
       </MapView>
 
-      <View style={tw`absolute bottom-0 left-0 right-0 p-4 bg-white`}>
+      <View style={tw`absolute bottom-0 left-0 right-0 p-4`}>
         <View style={tw`flex-row justify-around`}>
-          <TouchableOpacity onPress={handleSavePolygon} style={tw`bg-blue-600 p-2 rounded`}>
+          <TouchableOpacity onPress={handleSavePolygon} style={tw`bg-green-500 p-4 rounded-full flex-1 mr-2 mb-20`}>
             <Text style={tw`text-white text-center`}>Save Polygon</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={clearMarkers} style={tw`bg-red-600 p-2 rounded`}>
+          <TouchableOpacity onPress={clearMarkers} style={tw`bg-black p-4 rounded-full flex-1 ml-2 mb-20`}>
             <Text style={tw`text-white text-center`}>Clear Markers</Text>
           </TouchableOpacity>
         </View>
