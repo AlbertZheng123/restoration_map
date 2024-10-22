@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Image } from 'react-native';
-import tw from 'twrnc'; // Tailwind for styling
+// c:\Users\korra\Downloads\restoration_map\my-app\Components\Plants\Hyacinth.js
+
+import React from 'react';
+import Plant from './Plant';
 
 function HyacinthPlant() {
-    return (
-        <View>
-            <Text style={tw`text-center font-bold text-3xl mb-4`}>HyacinthPlant Info</Text>
-        </View>
-    )
+  return (
+    <Plant
+      imageSrc={require('../../assets/hyacinthplant.png')} // Update with the actual path to the water hyacinth image
+      name="Water Hyacinth"
+      terrain="Freshwater bodies"
+      terrainExample="Common in: Lakes and ponds"
+      growthDuration="Rapid, can double population in two weeks"
+      growthExample="Growth Rate"
+      description="Water Hyacinth is an invasive aquatic plant known for its rapid spread, which can block waterways and harm aquatic ecosystems."
+      descriptionExample="Characteristics"
+      usageCount={8} // Example usage count
+      usageExample="Times managed in water bodies"
+    />
+  );
 }
 
 export default HyacinthPlant;
