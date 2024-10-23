@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
-    <View style={tw`absolute bottom-0 left-0 right-0 bg-black py-5`}>
+    <View style={[tw`absolute bottom-0 left-0 right-0 py-5`, {backgroundColor: '#EDEADE'}]}>
       {/* Adjusting padding to increase vertical height */}
       <View style={tw`flex-row justify-around items-center h-12`}>
         {/* Set a fixed height for the tab bar to make it more prominent */}
@@ -49,7 +49,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
               <View style={tw`flex-row items-center`}>
                 <Icon name={iconName} size={24} color={isFocused ? '#61CD5F' : 'gray'} />
                 {isFocused && (
-                  <Text style={tw`ml-2 text-green-400 font-bold`}>
+                  <Text style={tw`ml-2 text-black font-bold`}>
                     {label}
                   </Text>
                 )}

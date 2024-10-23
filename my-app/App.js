@@ -154,7 +154,7 @@
 // };
 
 // export default App;
-
+import 'react-native-get-random-values';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -174,6 +174,11 @@ import KnotweedPlant from './Components/Plants/KnotweedPlant';
 import MustardPlant from './Components/Plants/MustardPlant';
 import PurplePlant from './Components/Plants/PurplePlant';
 import HyacinthPlant from './Components/Plants/Hyacinth';
+import InnerPolygonMap from './Components/InnerPolygonMap';
+import InnerPolygonsSection from './Components/InnerPolygonsSection';
+import ImpactDetails from './Components/ImpactDetails';
+import InnerPolygonDetails from './Components/InnerPolygonDetails';
+import BiomassOverlayPage from './Components/BiomassOverlayPage';
 
 const Stack = createStackNavigator();
 
@@ -315,6 +320,11 @@ const App = () => {
         <Stack.Screen name="PurplePlant" component={PurplePlant} options={{ title: 'Purple Plant' }} />
         <Stack.Screen name="HyacinthPlant" component={HyacinthPlant} options={{ title: 'Hyacinth Plant' }} />
         <Stack.Screen name="OakPlant" component={OakPlant} options={{ title: 'Oak Plant' }} />
+        <Stack.Screen name="InnerPolygonMap" component={InnerPolygonMap} options={{ title: 'Inner Polygon Map' }} />
+        <Stack.Screen name="InnerPolygonsSection" component={InnerPolygonsSection} options={{ title: 'Inner Polygon Section' }} />
+        <Stack.Screen name="ImpactDetails" component={ImpactDetails} options={{ title: 'Impact Details' }} />
+        <Stack.Screen name="InnerPolygonDetails" component={InnerPolygonDetails} options={{ title: 'Inner Polygon Details' }} />
+        <Stack.Screen name="BiomassOverlayPage" component={BiomassOverlayPage} options={{ title: 'Biomass Heatmap' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

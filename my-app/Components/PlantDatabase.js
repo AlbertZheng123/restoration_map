@@ -50,7 +50,7 @@ function PlantDatabase() {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 bg-white`}>
+    <SafeAreaView style={[tw`flex-1`, {backgroundColor: '#EDEADE'}]}>
       <View>
         <Text style={tw`text-center text-3xl mb-4 font-bold`}>Plants Database</Text>
       </View>
@@ -83,7 +83,7 @@ function PlantDatabase() {
         keyExtractor={(item, index) => index.toString()}
         ListEmptyComponent={<Text style={tw`text-center text-gray-500`}>No plants match your search.</Text>}
         renderItem={({ item, index }) => (
-          <View key={index} style={tw`p-4 bg-white mb-2 shadow rounded-lg flex-row items-center`}>
+          <View key={index} style={[tw`p-4 mb-2 shadow rounded-lg flex-row items-center`, {backgroundColor: '#EDEADE'}]}>
             <Image source={item.image} style={tw`w-16 h-16 mr-4 rounded`} />
             <TouchableOpacity 
               style={tw`flex-1 flex-row justify-between items-center`} 

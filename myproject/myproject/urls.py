@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from maps.views import PlantViewSet
+from django.conf import settings
+from django.conf.urls.static import static
 
-router = DefaultRouter()
-router.register(r'plants', PlantViewSet)
+from maps import views  # Assuming your views are in an app named 'maps'
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('api/predict_plant_growth/', views.predict_plant_growth, name='predict-plant-growth'),  # Ensure consistency in URL format
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
