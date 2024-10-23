@@ -2,29 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import tw from 'twrnc';
+import Login from './Login';  // Ensure Login is in the same directory or adjust the path
 
 const Home = () => {
-  const [isLoading, setIsLoading] = useState(true); // Initialize all hooks at the top level
+  const [isLoading, setIsLoading] = useState(true);
   const [activeIcon, setActiveIcon] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);  // Handle login state
 
-  // Simulate loading with a useEffect
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000); // Trigger after 2 seconds
+    }, 2000);
 
-    return () => clearTimeout(timer); // Clean-up function to clear timer
+    return () => clearTimeout(timer);
   }, []);
 
-  // Icon and description data
-  const iconData = [
-    { icon: 'user', label: 'Profile', description: 'Manage your personal profile and settings.' },
-    { icon: 'settings', label: 'Settings', description: 'Customize your experience and make it unique to your needs.' },
-    { icon: 'activity', label: 'Activity', description: 'Track your activity and review your engagement stats.' },
-    { icon: 'layers', label: 'Layers', description: 'Explore and manage your data with a comprehensive layer view.' }
-  ];
-
-  // Conditional rendering controlled by isLoading state
   if (isLoading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-gray-900`}>
@@ -34,6 +26,12 @@ const Home = () => {
     );
   }
 
+  // If not logged in, show Login screen
+  if (!isLoggedIn) {
+    return <Login />;
+  }
+
+  // Render main content if logged in
   return (
     <ScrollView style={tw`flex-1 bg-gray-900`}>
       <View style={tw`bg-gray-800 items-center justify-center py-12`}>

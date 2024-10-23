@@ -300,9 +300,9 @@ const App = () => {
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#2d3e34', // Black-ish green color
+            backgroundColor: '#EDEADE', // Black-ish green color
           },
-          headerTintColor: '#fff', // White text for header
+          headerTintColor: 'black', // White text for header
           headerTitleStyle: {
             fontWeight: 'bold',
           },
