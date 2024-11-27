@@ -115,7 +115,7 @@ const InfoSection = ({ label, leftInfo, rightInfo, editable = false }) => {
           </View>
           <View style={tw`flex-1 items-end`}>
             <Text style={tw`text-xs text-gray-500 mb-1`}>Details</Text>
-            <Text style={tw`text-sm text-gray-800`}>{value}</Text>
+            {/* <Text style={tw`text-sm text-gray-800`}>{value}</Text> */}
           </View>
         </View>
       </View>

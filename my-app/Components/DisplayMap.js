@@ -3,6 +3,24 @@ import { View, Text } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import tw from 'twrnc';
 
+// Function to map plant type to marker color (shades of green)
+const getMarkerColor = (plant) => {
+  switch (plant) {
+    case 'oak':
+      return '#2e8b57'; // Dark Green
+    case 'pine':
+      return '#32cd32'; // Lime Green
+    case 'cedar':
+      return '#228b22'; // Forest Green
+    case 'birch':
+      return '#006400'; // Darker Green
+    case 'maple':
+      return '#7fff00'; // Chartreuse
+    default:
+      return '#2e8b57'; // Default to dark green
+  }
+};
+
 const DisplayMap = ({ polygon = [], markers = [], mapHeight = "200px" }) => {
   const mapRef = useRef(null);
 
@@ -14,24 +32,14 @@ const DisplayMap = ({ polygon = [], markers = [], mapHeight = "200px" }) => {
         animated: true,
       });
     }
-  }, [polygon]);
 
-  // Function to calculate the center of the polygon (if needed)
-  const calculateCenter = (coordinates) => {
-    if (coordinates.length === 0) return { latitude: 37.78825, longitude: -122.4324 }; // Default location
-    let latSum = 0, lngSum = 0;
-    coordinates.forEach(coord => {
-      latSum += coord.latitude;
-      lngSum += coord.longitude;
-    });
-    return {
-      latitude: latSum / coordinates.length,
-      longitude: lngSum / coordinates.length,
-    };
-  };
+    // Log markers received by DisplayMap
+    console.log('Markers received by DisplayMap:', JSON.stringify(markers, null, 2));
+  }, [polygon, markers]);
 
-  // Calculate the center of the polygon
-  const initialCenter = calculateCenter(polygon);
+  if (markers.length === 0) {
+    return <Text style={tw`text-center text-gray-500 p-4`}>No markers to display</Text>;
+  }
 
   return (
     <View style={[tw`flex-1`, { height: mapHeight }]}>
@@ -40,8 +48,8 @@ const DisplayMap = ({ polygon = [], markers = [], mapHeight = "200px" }) => {
           ref={mapRef}
           style={tw`flex-1`}
           initialRegion={{
-            latitude: initialCenter.latitude,
-            longitude: initialCenter.longitude,
+            latitude: polygon.length ? polygon[0].latitude : 37.78825,
+            longitude: polygon.length ? polygon[0].longitude : -122.4324,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}
@@ -62,7 +70,7 @@ const DisplayMap = ({ polygon = [], markers = [], mapHeight = "200px" }) => {
             <Marker 
               key={index} 
               coordinate={marker} 
-              pinColor={marker.plant} // Display the marker color based on the plant type
+              pinColor={getMarkerColor(marker.plant)} // Use green shades based on plant type
             />
           ))}
         </MapView>

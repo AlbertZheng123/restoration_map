@@ -88,12 +88,26 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleGoogleSignIn = () => {
-    console.log("Google Sign-In triggered");
+  const handleEmailLogin = () => {
+    // Validate email and password before proceeding
+    if (!email || !password) {
+      setError('Email and Password are required.');
+      return;
+    }
+
+    // Simulate login API call (replace with actual API call if necessary)
+    if (email === "test@example.com" && password === "password123") {
+      // Clear error and navigate to Home
+      setError('');
+      navigation.navigate('Home');  // Ensure "Home" is defined in your navigation stack
+    } else {
+      setError('Invalid email or password.');
+    }
   };
 
-  const handleEmailLogin = () => {
-    console.log("Email Login triggered");
+  const handleGoogleSignIn = () => {
+    console.log("Google Sign-In triggered");
+    // Handle Google Sign-In logic
   };
 
   return (
@@ -139,7 +153,7 @@ const Login = ({ navigation }) => {
           <Text style={tw`text-white text-lg`}>Continue with Google</Text>
         </TouchableOpacity>
       </ScrollView>
-      
+
       {/* Bottom Text Section Above Navbar */}
       <View style={tw`items-center p-3 mt-auto mb-5`}>
         <Text style={tw`text-xs text-gray-600 text-center`}>

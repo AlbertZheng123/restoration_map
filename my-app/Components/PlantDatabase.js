@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, SafeAreaView, Image, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import tw from 'twrnc'; // Tailwind for styling
+import tw from 'twrnc';
 import { Icon } from 'react-native-elements';
-import PlantImage from '../assets/plant.jpg'; // Ensure this path is correct
+
+// Import all plant images
 import OakImage from '../assets/oakplant.png';
 import MapleImage from '../assets/mapleplant.png';
 import PineImage from '../assets/pineplant.png';
@@ -14,6 +15,7 @@ import KnotweedImage from '../assets/knotweed.png';
 import MustardImage from '../assets/mustardplant.jpg';
 import PurpleImage from '../assets/purpleplant.png';
 import HyacinthImage from '../assets/hyacinthplant.png';
+import DefaultImage from '../assets/plant.jpg';
 
 const nativePlants = [
   { name: 'Oak', description: 'Oak trees are large, long-lived trees found worldwide.', image: OakImage, detail: "OakPlant" },
@@ -34,19 +36,26 @@ const invasivePlants = [
 function PlantDatabase() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("native");
+  const [userPlants, setUserPlants] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newPlant, setNewPlant] = useState({ name: '', description: '', image: null });
   const navigation = useNavigation();
 
   const filteredPlants = activeTab === 'native'
-    ? nativePlants.filter((plant) => plant.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? nativePlants.concat(userPlants).filter((plant) => plant.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : invasivePlants.filter((plant) => plant.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const navigateToPlant = (plant) => {
-    if (plant.name) {
+    if (plant.detail) {
       navigation.navigate(plant.detail);
     }
-    // else {
-    //   navigation.navigate('PlantDetail', { plant });
-    // }
+  };
+
+  const addNewPlant = () => {
+    const plantImage = newPlant.image || DefaultImage;
+    setUserPlants([...userPlants, { ...newPlant, image: plantImage }]);
+    setNewPlant({ name: '', description: '', image: DefaultImage });
+    setShowForm(false);
   };
 
   return (
@@ -54,16 +63,16 @@ function PlantDatabase() {
       <View>
         <Text style={tw`text-center text-3xl mb-4 font-bold`}>Plants Database</Text>
       </View>
-      <View style={tw`flex-row bg-black p-4`}>
+      <View style={tw`flex-row p-4`}>
         <TouchableOpacity
           onPress={() => setActiveTab('native')}
-          style={tw`flex-1 p-2 rounded ${activeTab === 'native' ? 'bg-green-500' : 'bg-white'}`}
+          style={tw`flex-1 p-2 rounded ${activeTab === 'native' ? 'bg-green-500' : 'bg-white'} border border-black`}
         >
           <Text style={tw`text-center text-black`}>Native Plants</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('invasive')}
-          style={tw`flex-1 p-2 rounded ${activeTab === 'invasive' ? 'bg-green-500' : 'bg-white'}`}
+          style={tw`flex-1 p-2 rounded ${activeTab === 'invasive' ? 'bg-green-500' : 'bg-white'} border border-black`}
         >
           <Text style={tw`text-center text-black`}>Invasive Species</Text>
         </TouchableOpacity>
@@ -98,6 +107,40 @@ function PlantDatabase() {
           </View>
         )}
       />
+
+      {/* Modal for New Plant Form */}
+      <Modal visible={showForm} animationType="slide">
+        <SafeAreaView style={tw`p-4 flex-1 justify-center`}>
+          <TextInput
+            placeholder="Plant Name"
+            value={newPlant.name}
+            onChangeText={(text) => setNewPlant({ ...newPlant, name: text })}
+            style={tw`bg-black text-white p-2 rounded mb-2`}
+          />
+          <TextInput
+            placeholder="Description"
+            value={newPlant.description}
+            onChangeText={(text) => setNewPlant({ ...newPlant, description: text })}
+            style={tw`bg-black text-white p-2 rounded mb-2`}
+          />
+          <TouchableOpacity style={tw`p-2 bg-green-600 rounded mb-2`} onPress={addNewPlant}>
+            <Text style={tw`text-center text-white`}>Save Plant</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={tw`p-2 bg-red-600 rounded`} onPress={() => setShowForm(false)}>
+            <Text style={tw`text-center text-white`}>Cancel</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Button to add a new plant */}
+      <View style={tw`p-4`}>
+        <TouchableOpacity 
+          style={tw`p-4 bg-blue-600 rounded text-center`}
+          onPress={() => setShowForm(true)}
+        >
+          <Text style={tw`text-center text-white`}>Add New Plant</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
