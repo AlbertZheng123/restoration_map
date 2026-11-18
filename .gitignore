@@ -1,0 +1,32 @@
+# Dependencies and Python environments
+node_modules/
+venv/
+venv_py/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+
+# Local databases and generated output
+*.sqlite3
+*.sqlite3-journal
+/myproject/media/generated/
+build/
+dist/
+coverage/
+.pytest_cache/
+
+# Credentials (examples remain shareable)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

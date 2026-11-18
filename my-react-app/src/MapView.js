@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 // Include Mapbox CSS
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
+const mapboxAccessToken = process.env.REACT_APP_MAPBOX_PUBLIC_TOKEN;
 
 function MapInteractionHandler({ isPlantModeActive, onMapClick }) {
   useMapEvents({

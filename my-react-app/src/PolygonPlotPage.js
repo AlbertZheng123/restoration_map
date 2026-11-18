@@ -3,6 +3,8 @@ import { MapContainer, FeatureGroup, Polygon, TileLayer } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+const mapboxAccessToken = process.env.REACT_APP_MAPBOX_PUBLIC_TOKEN;
+
 import 'leaflet/dist/leaflet.css'; 
 import 'leaflet-draw/dist/leaflet.draw.css';
 // Function to determine polygon color based on the number of plants

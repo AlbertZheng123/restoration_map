@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Polygon, ImageOverlay, useMap } from 'react-le
 import L from 'leaflet';
 import { useLocation } from 'react-router-dom';
 
+const mapboxAccessToken = process.env.REACT_APP_MAPBOX_PUBLIC_TOKEN;
+
 export default function BiomassOverlayPage() {
   const location = useLocation();
   const { polygon, imageURL } = location.state || {}; 
