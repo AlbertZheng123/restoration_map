@@ -5,9 +5,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import 'leaflet/dist/leaflet.css'; 
 import 'leaflet-draw/dist/leaflet.draw.css';
-
-const mapboxAccessToken = 'sk.eyJ1IjoiYWxiZXJ0emhlbmciLCJhIjoiY20yY3E0bG43MGlmZzJscG10Mnk0NzBiaiJ9.XaaAKQmi-TQtWflh72WvYw';
-
 // Function to determine polygon color based on the number of plants
 const getPolygonColor = (plantCount) => {
   if (plantCount <= 20) return 'yellow';             
